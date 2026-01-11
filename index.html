@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Gumbo & The Golden Mango</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>
+:root{
+  --yellow:#FFD84D;
+  --orange:#FFB703;
+  --card:#ffffff;
+  --ink:#2f2f2f;
+  --shadow:0 20px 40px rgba(0,0,0,.18);
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:#FFF9E6;
+  font-family:"Trebuchet MS", system-ui, sans-serif;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* GAME FRAME */
+#game{
+  width:960px;height:540px;border-radius:24px;overflow:hidden;
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;position:relative;
+}
+
+/* ================= HOME ================= */
+#home{
+  position:absolute;inset:0;z-index:10;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;
+  background:
+    url("mango background.jpg") center/cover no-repeat,
+    linear-gradient(180deg,#FFF3B0,#FFD84D);
+}
+#homeCard{
+  width:min(720px, 92%);
+  background:rgba(255,255,255,.75);
+  border:3px solid rgba(255,183,3,.55);
+  border-radius:26px;padding:28px 22px;
+  backdrop-filter: blur(6px);
+  box-shadow:0 14px 24px rgba(0,0,0,.12);
+}
+#homeTitle{
+  text-align:center;font-size:60px;margin:0 0 14px;line-height:1.05;
+  animation:titlePop .9s ease-out both,titleFloat 2.8s ease-in-out infinite 1s;
+}
+.title-gumbo{color:#FF8C00;font-weight:900;text-shadow:0 4px 0 #FFD84D;}
+.title-and{color:#6b4a00;font-weight:800;}
+.title-mango{color:#F6A800;font-weight:900;text-shadow:0 4px 0 #FFE88A;}
+@keyframes titlePop{
+  0%{transform:scale(.6) translateY(-20px);opacity:0;}
+  60%{transform:scale(1.08) translateY(4px);opacity:1;}
+  80%{transform:scale(.96) translateY(-2px);}
+  100%{transform:scale(1) translateY(0);}
+}
+@keyframes titleFloat{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-6px);}
+}
+#homeSub{font-size:26px;margin:0 0 22px;color:#6b4a00;font-weight:700;}
+#startBtn{
+  padding:14px 34px;font-size:18px;border:none;border-radius:999px;
+  background:var(--orange);color:white;font-weight:900;cursor:pointer;
+}
+
+/* ================= MANGO RAIN (PROPER MANGO SHAPE) ================= */
+#mangoRain{
+  position:absolute;inset:0;pointer-events:none;
+  overflow:hidden;display:none;z-index:20;
+}
+.mangoDrop{
+  position:absolute;
+  top:-260px;
+  animation:fall 1.3s linear forwards;
+}
+@keyframes fall{
+  from{ transform:translateY(0); opacity:0; }
+  10%{opacity:1;}
+  to{ transform:translateY(820px); opacity:1; }
+}
+
+/* Mango shape */
+.mango{
+  width:140px;height:190px;
+  background: radial-gradient(circle at 30% 30%, #ffe48a, #ffb400 55%, #ff8a00 100%);
+  border-radius: 60% 60% 70% 70% / 55% 55% 80% 80%;
+  transform: rotate(-18deg);
+  position: relative;
+  box-shadow: 0 18px 30px rgba(0,0,0,0.18);
+}
+.mango::before{
+  content:"";
+  position:absolute;
+  top:30px;left:35px;
+  width:45px;height:90px;
+  border-radius:50px;
+  background:rgba(255,255,255,0.25);
+}
+.stem{
+  position:absolute;top:-18px;left:70px;
+  width:12px;height:30px;background:#6b3b1f;border-radius:10px;
+}
+.leaf{
+  position:absolute;top:-30px;left:80px;
+  width:70px;height:40px;
+  background: radial-gradient(circle at 30% 30%, #7dff7d, #1dbb4c 70%);
+  border-radius:100% 0 100% 0;
+}
+
+/* ================= HUD ================= */
+#miniTitle{
+  position:absolute;top:10px;left:14px;
+  font-weight:900;color:#fff;
+  text-shadow:0 2px 4px rgba(0,0,0,.4);
+  display:none;
+}
+#quizHud{
+  position:absolute;top:10px;right:14px;
+  display:none;gap:10px;
+}
+.pill{
+  background:#fff;padding:6px 12px;border-radius:999px;font-size:14px;font-weight:900;
+}
+
+/* ================= SCENE ================= */
+#scene{
+  flex:1;
+  background:url("pig seller.jpg") center/cover no-repeat;
+  position:relative;
+}
+
+/* ================= BASKET ================= */
+#basketFrame{
+  position:absolute;inset:0;display:none;
+  align-items:center;justify-content:center;padding:18px;
+  background:rgba(0,0,0,.4);
+
+/* NEW: fruit basket background */
+ background:
+   url("fruit-basket.jpg") center/cover no-repeat,
+   rgba(0,0,0,.4);
+}
+
+#basketCard{
+  width:92%;height:92%;border-radius:22px;background:rgba(255,255,255,.92);
+  border:3px solid rgba(255,183,3,.55);
+  padding:18px;display:flex;flex-direction:column;gap:10px;
+}
+#fruitScroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;}
+.fruitTip{border-radius:16px;background:#FFF7CC;border:2px solid #FFB703;padding:12px;}
+.fruitName{font-weight:900;color:#8a5a00;}
+.fruitText{font-size:15px;line-height:1.45;}
+
+/* ================= DIALOGUE ================= */
+#dialogue{
+  height:150px;
+  background:#fff;border-top:4px solid #FFB703;
+  padding:10px 14px;display:flex;flex-direction:column;
+}
+#speaker{font-weight:900;color:#ff9800;font-size:16px;}
+#text{
+  flex:1;overflow-y:auto;
+  line-height:1.55;
+  font-size:20px;
+  color:#2f2f2f;
+  cursor:pointer;
+}
+#choices{display:flex;gap:10px;}
+.choice{
+  flex:1;padding:10px;border-radius:14px;
+  border:2px solid #FFB703;background:#FFF7CC;
+  cursor:pointer;font-weight:900;font-size:15px;
+}
+
+/* ================= SIDE FEEDBACK ================= */
+#sideFeedback{
+  position:absolute;right:14px;bottom:170px;
+  display:none;z-index:15;
+  background:rgba(255,255,255,.9);
+  border:2px solid #FFB703;
+  border-radius:16px;
+  padding:10px 12px;
+  font-weight:900;
+  color:#6b4a00;
+  animation:pop .4s ease;
+}
+@keyframes pop{
+  0%{transform:scale(.7);opacity:0;}
+  100%{transform:scale(1);opacity:1;}
+}
+
+/* ================= WIN ================= */
+#winOverlay{
+  position:absolute;inset:0;display:none;
+  align-items:center;justify-content:center;z-index:30;
+  background:rgba(0,0,0,.45);
+}
+#winCard{
+  width:min(560px,92%);
+  background:linear-gradient(180deg,#FFF7CC,#FFD84D);
+  border:4px solid #FFB703;border-radius:26px;
+  padding:22px 24px;text-align:center;
+}
+#mangoAnim{font-size:82px;animation:bounce 1s infinite;}
+@keyframes bounce{50%{transform:translateY(-10px);}}
+
+/* ================= RESTART ================= */
+#restartScreen{
+  position:absolute;inset:0;display:none;z-index:40;
+  align-items:center;justify-content:center;text-align:center;
+  background:
+    url("mango background.jpg") center/cover no-repeat,
+    linear-gradient(180deg,#FFF3B0,#FFD84D);
+}
+#restartCard{
+  background:rgba(255,255,255,.8);
+  padding:26px;border-radius:26px;
+  box-shadow:0 14px 24px rgba(0,0,0,.2);
+}
+</style>
+</head>
+
+<body>
+<div id="game">
+
+<div id="mangoRain"></div>
+
+<!-- HOME -->
+<div id="home">
+  <div id="homeCard">
+    <h1 id="homeTitle">
+      <span class="title-gumbo">Gumbo</span>
+      <span class="title-and"> & </span>
+      <span class="title-mango">The Golden Mango</span>
+    </h1>
+    <p id="homeSub">Do you have what it takes to win Gumbo’s Golden Mango?</p>
+    <button id="startBtn">START</button>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="miniTitle">Gumbo & The Golden Mango</div>
+<div id="quizHud">
+  <div class="pill" id="progress">0 / 10</div>
+  <div class="pill" id="score">Score: 0</div>
+</div>
+
+<!-- SCENE -->
+<div id="scene">
+  <div id="sideFeedback"></div>
+
+  <!-- BASKET -->
+  <div id="basketFrame">
+    <div id="basketCard">
+      <h3>🍍 Gumbo’s Helper Basket</h3>
+      <p>Scroll and read carefully — these tips will protect you in real life.</p>
+
+<div id="fruitScroll">
+
+  <div class="fruitTip">
+    <div class="fruitName">🍎 What is Generative AI?</div>
+    <div class="fruitText">
+      Generative AI refers to systems that can create new content such as text, images, videos,
+      or voices by learning patterns from large amounts of data.
+      <br><br>
+      <b>Why it matters:</b> These outputs can look very real, even if they are fake or misleading.
+    </div>
+  </div>
+
+  <div class="fruitTip">
+    <div class="fruitName">🍊 Examples of Generative AI</div>
+    <div class="fruitText">
+      Common examples include AI chatbots, AI image generators, voice cloning tools,
+      and video deepfakes.
+      <br><br>
+      <b>Risk:</b> People may assume the content is real when it is actually AI-generated.
+    </div>
+  </div>
+
+  <div class="fruitTip">
+    <div class="fruitName">🍌 Impersonation & Identity Misuse</div>
+    <div class="fruitText">
+      Generative AI can copy writing styles, profile photos, or voices to impersonate real people.
+      <br><br>
+      <b>Warning signs:</b> Urgency, secrecy, or requests for OTPs, passwords, or money.
+      <br><br>
+      <b>Safe move:</b> Always verify using a trusted method you already know.
+    </div>
+  </div>
+
+  <div class="fruitTip">
+    <div class="fruitName">🍓 Deepfakes & Fake Media</div>
+    <div class="fruitText">
+      AI can generate fake images, videos, or audio that appear realistic.
+      <br><br>
+      <b>Danger:</b> These can be used to embarrass, threaten, or manipulate people.
+      <br><br>
+      <b>Safe move:</b> Do not share. Save evidence and report the content.
+    </div>
+  </div>
+
+  <div class="fruitTip">
+    <div class="fruitName">🥭 Data Privacy & Over-Sharing</div>
+    <div class="fruitText">
+      AI tools may store or reuse information that users input.
+      <br><br>
+      <b>Risk:</b> Personal data can be misused or leaked.
+      <br><br>
+      <b>Safe move:</b> Never share NRIC, passwords, OTPs, or private details with AI tools.
+    </div>
+  </div>
+
+</div>
+
+
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="choice" id="basketNext">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DIALOGUE -->
+<div id="dialogue">
+  <div id="speaker"></div>
+  <div id="text"></div>
+  <div id="choices"></div>
+</div>
+
+<!-- WIN -->
+<div id="winOverlay">
+  <div id="winCard">
+    <div id="mangoAnim">🥭</div>
+    <h2>Golden Mango Winner!</h2>
+    <p id="winText"></p>
+  </div>
+</div>
+
+<!-- RESTART -->
+<div id="restartScreen">
+  <div id="restartCard">
+    <h2>Play Again?</h2>
+    <button class="choice" id="restartBtn">Restart Game</button>
+  </div>
+</div>
+
+<!-- SOUND (optional: if files missing, game still runs) -->
+<audio id="sndClick" src="click.mp3" preload="auto"></audio>
+<audio id="sndGood"  src="good.mp3"  preload="auto"></audio>
+<audio id="sndBad"   src="bad.mp3"   preload="auto"></audio>
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+
+/* UTIL */
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function safePlay(audioEl){
+  try{
+    if(!audioEl) return;
+    audioEl.currentTime = 0;
+    const p = audioEl.play();
+    if(p && typeof p.catch === "function") p.catch(()=>{});
+  }catch(e){}
+}
+
+/* TYPEWRITER */
+let typing={active:false,skip:false};
+async function typeText(el,text){
+  typing.active=true;typing.skip=false;
+  el.textContent="";
+  const parts = String(text).split(" ");
+  for(const w of parts){
+    if(typing.skip) break;
+    el.textContent+=w+" ";
+    await sleep(200); // keep your original pacing
+  }
+  if(typing.skip) el.textContent=text;
+  typing.active=false;
+}
+const textBox=document.getElementById("text");
+textBox.onclick=()=>{ if(typing.active) typing.skip=true; };
+
+/* ELEMENTS */
+const home=document.getElementById("home");
+const startBtn=document.getElementById("startBtn");
+const mangoRain=document.getElementById("mangoRain");
+const speakerBox=document.getElementById("speaker");
+const choicesBox=document.getElementById("choices");
+const basketFrame=document.getElementById("basketFrame");
+const basketNext=document.getElementById("basketNext");
+const sideFeedback=document.getElementById("sideFeedback");
+const winOverlay=document.getElementById("winOverlay");
+const winText=document.getElementById("winText");
+const restartScreen=document.getElementById("restartScreen");
+const restartBtn=document.getElementById("restartBtn");
+const miniTitle=document.getElementById("miniTitle");
+const quizHud=document.getElementById("quizHud");
+const progressBox=document.getElementById("progress");
+const scoreBox=document.getElementById("score");
+
+/* SOUND */
+const sndClick=document.getElementById("sndClick");
+const sndGood=document.getElementById("sndGood");
+const sndBad=document.getElementById("sndBad");
+
+/* STATE */
+let score=0,qIndex=0,storyIndex=0;
+
+/* STORY \ */
+const story=[
+  { s:"Gumbo", t:"Ahem! Fresh fruits! Sweet melons! Crunchy apples! Welcome, welcome — I’m Gumbo, the proud boss of this stall!" , c:["Hi Gumbo! 👋"] },
+  { s:"Gumbo", t:"Today is SPECIAL. I’m running a contest for a prize so rare… even the bananas are jealous: the Golden Mango.", c:["Tell me more about the contest 👀"] },
+  { s:"Gumbo", t:"Rules are simple: get at least 9 out of 10 questions correct, and I’ll hand you the Golden Mango. If not… you win my emotional support. (It’s priceless.)", c: ["Why is the Golden Mango so special?"]},
+  { s:"Gumbo", t:"It ripens once every few years — shiny, sweet, legendary. People chase rare prizes like this online too… and some use Generative AI to scam and impersonate others. Not on my watch!" },
+  { s:"Gumbo", t:"So… will you play fairly? No funny business. I’m the only one allowed to be dramatic here.", c:["Yes, I’m in! ✅"]},
+  { s:"Gumbo", t:"Good choice! I’m not heartless — I’ll help you first. Take this fruit basket. Each fruit has a tip about AI-related online harms. Read it like your mango depends on it.", basket:true},
+  { s:"Gumbo", t:"Alright! Basket read? Great. You didn’t eat the basket — impressive self-control. Ready for the quiz?", c:["Start the quiz! 🥭"], quiz:true}
+];
+
+/* QUESTIONS */
+const questions=[
+[
+ "What is Generative AI?",
+ "A system that only stores information",
+ "A system that creates new content like text, images, or videos",
+ "A system that only checks spelling",
+ 1
+],
+[
+ "Which of the following is an example of Generative AI?",
+ "Calculator app",
+ "AI image generator",
+ "Antivirus software",
+ 1
+],
+[
+ "Why can Generative AI content be risky online?",
+ "It always tells the truth",
+ "It can look real even when it is fake",
+ "It cannot generate images",
+ 1
+],
+[
+ "What is a deepfake?",
+ "A virus hidden in files",
+ "AI-generated fake images, videos, or audio",
+ "A secure online identity system",
+ 1
+],
+[
+ "Someone sends you a voice message that sounds like your parent asking for money. What should you do?",
+ "Send the money immediately",
+ "Call your parent using a trusted number to verify",
+ "Reply and ask the voice to repeat",
+ 1
+],
+[
+ "Why is sharing personal data with AI tools risky?",
+ "AI tools forget everything instantly",
+ "Your data may be stored or misused",
+ "AI tools are always private",
+ 1
+],
+[
+ "A message asks for your OTP to fix an AI-detected issue. What is the safest action?",
+ "Share the OTP quickly",
+ "Ignore and verify through official channels",
+ "Ask the sender for proof",
+ 1
+],
+[
+ "Which behaviour suggests AI impersonation?",
+ "Casual greetings",
+ "Urgent requests with secrecy",
+ "Clear official verification",
+ 1
+],
+[
+ "Someone threatens to share an AI-edited image of you. What should you do?",
+ "Pay them to stop",
+ "Save evidence and report the threat",
+ "Argue with them online",
+ 1
+],
+[
+ "What is the safest way to interact with Generative AI tools?",
+ "Share as much personal data as possible",
+ "Use them carefully without sharing sensitive information",
+ "Trust everything they generate",
+ 1
+]
+];
+
+
+/* FEEDBACK LINES */
+const goodLines=[
+  "Correct! That was the safest move. I approve. 🥭",
+  "Well done! You kept your brain switched on — impressive.",
+  "Excellent choice. You just dodged a scam like a pro.",
+  "Great thinking. That decision protects you and your friends."
+];
+const badLines=[
+  "Oof. That choice could get you in trouble. Even my apples are judging you.",
+  "Not quite. That response makes scams much easier.",
+  "Careful — that’s unsafe. I’m confiscating your imaginary phone.",
+  "Nope. That could lead to serious problems. Let’s do better."
+];
+
+/* UI HELPERS */
+function clearChoices(){choicesBox.innerHTML="";}
+function updateHUD(){
+  progressBox.textContent=`${qIndex} / 10`;
+  scoreBox.textContent=`Score: ${score}`;
+}
+
+/* MANGO RAIN */
+function startMangoRain(){
+  mangoRain.innerHTML = "";
+  mangoRain.style.display="block";
+  for(let i=0;i<10;i++){
+    const d=document.createElement("div");
+    d.className="mangoDrop";
+    d.style.left=Math.random()*100+"%";
+    d.style.animationDelay=(Math.random()*0.4)+"s";
+
+    const m=document.createElement("div");
+    m.className="mango";
+    m.innerHTML='<div class="stem"></div><div class="leaf"></div>';
+    d.appendChild(m);
+
+    mangoRain.appendChild(d);
+    setTimeout(()=>d.remove(),1600);
+  }
+  setTimeout(()=>mangoRain.style.display="none",1700);
+}
+
+/* STORY FLOW (FIXED QUIZ BUTTON) */
+async function runStory(){
+  const node=story[storyIndex];
+  clearChoices();
+  speakerBox.textContent=node.s;
+  await typeText(textBox,node.t);
+
+  if(node.basket){
+    basketFrame.style.display="flex";
+    return;
+  }
+
+  if(node.c){
+    node.c.forEach(txt=>{
+      const b=document.createElement("button");
+      b.className="choice";
+      b.textContent=txt;
+
+      // ✅ FIX: if this node is the quiz node, start the quiz instead of advancing story
+      if(node.quiz){
+        b.onclick=()=>{ safePlay(sndClick); startQuiz(); };
+      }else{
+        b.onclick=()=>{ safePlay(sndClick); storyIndex++; runStory(); };
+      }
+
+      choicesBox.appendChild(b);
+    });
+    return;
+  }
+
+  storyIndex++;
+  await sleep(350);
+  if(storyIndex < story.length) runStory();
+}
+
+/* Basket */
+basketNext.onclick=()=>{
+  safePlay(sndClick);
+  basketFrame.style.display="none";
+  storyIndex++;
+  runStory();
+};
+
+/* QUIZ */
+function startQuiz(){
+  miniTitle.style.display="block";
+  quizHud.style.display="flex";
+  score=0;qIndex=0;updateHUD();
+  showQ(0);
+}
+
+async function showQ(i){
+  qIndex=i;updateHUD();
+  clearChoices();
+  speakerBox.textContent="Gumbo";
+  await typeText(textBox,`Question ${i+1}/10: ${questions[i][0]}`);
+  for(let j=1;j<=3;j++){
+    const b=document.createElement("button");
+    b.className="choice";
+    b.textContent=questions[i][j];
+    b.onclick=()=>answer(i,j-1);
+    choicesBox.appendChild(b);
+  }
+}
+
+async function answer(i,sel){
+  clearChoices();
+  const correct=questions[i][4];
+  const isCorrect = sel===correct;
+
+  const line = isCorrect
+    ? goodLines[Math.floor(Math.random()*goodLines.length)]
+    : badLines[Math.floor(Math.random()*badLines.length)];
+
+  speakerBox.textContent="Gumbo";
+  await typeText(textBox,line);
+
+  sideFeedback.textContent = isCorrect ? "✅ Nice!" : "⚠️ Oops!";
+  sideFeedback.style.display="block";
+  setTimeout(()=>sideFeedback.style.display="none",900);
+
+  if(isCorrect){ score++; safePlay(sndGood); }
+  else safePlay(sndBad);
+
+  updateHUD();
+
+  await sleep(2400);
+  if(i<9) showQ(i+1);
+  else endGame();
+}
+
+/* END */
+async function endGame(){
+  clearChoices();
+  quizHud.style.display="none";
+  miniTitle.style.display="none";
+  speakerBox.textContent="Gumbo";
+
+  if(score>=9){
+    winText.textContent=`You scored ${score}/10 and won the Golden Mango!`;
+    winOverlay.style.display="flex";
+    await sleep(2600);
+  }else{
+    await typeText(textBox,`You scored ${score}/10. Good effort — come back stronger and earn that Golden Mango!`);
+    await sleep(2200);
+  }
+
+  restartScreen.style.display="flex";
+}
+
+/* RESTART */
+restartBtn.onclick=()=>{
+  safePlay(sndClick);
+  winOverlay.style.display="none";
+  restartScreen.style.display="none";
+  home.style.display="flex";
+  score=0;qIndex=0;storyIndex=0;
+  clearChoices();
+  speakerBox.textContent="";
+  textBox.textContent="";
+  updateHUD();
+};
+
+/* START */
+startBtn.onclick=()=>{
+  safePlay(sndClick);
+  startMangoRain();
+  setTimeout(()=>{
+    home.style.display="none";
+    winOverlay.style.display="none";
+    restartScreen.style.display="none";
+    storyIndex=0;
+    runStory();
+  },1200);
+};
+
+updateHUD();
+
+});
+</script>
+</body>
+</html>.  
